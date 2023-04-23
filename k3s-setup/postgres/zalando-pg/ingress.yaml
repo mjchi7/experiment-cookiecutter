@@ -1,0 +1,19 @@
+## TRAEFIK INGRESS DOESNT WORK WITH TCP - NGINX INGRESS SUPPORT
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: postgres
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /postgres
+            pathType: Prefix
+            backend:
+              service:
+                name: pg
+                port:
+                  number: 5432

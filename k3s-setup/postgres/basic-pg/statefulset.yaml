@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql-db
+spec:
+  serviceName: postgresql-db-service
+  selector:
+    matchLabels:
+      app: postgresql-db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgresql-db
+    spec:
+      # Official Postgres Container
+      containers:
+        - name: postgresql-db
+          image: postgres:13.10
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          # Resource Limits
+          resources:
+            requests:
+              memory: "265Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Data Volume
+          volumeMounts:
+            - name: postgresql-db-disk
+              mountPath: /data
+          # Point to ConfigMap
+          envFrom:
+            - configMapRef:
+                name: postgres-db-config
+        - name: postgres-exporter
+          image: quay.io/prometheuscommunity/postgres-exporter
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9187
+          env:
+            - name: DATA_SOURCE_NAME
+              value: postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable
+  # Volume Claim
+  volumeClaimTemplates:
+    - metadata:
+        name: postgresql-db-disk
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

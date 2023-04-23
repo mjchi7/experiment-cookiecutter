@@ -1,0 +1,18 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: pg
+spec:
+  teamId: "dev"
+  volume:
+    size: 1Gi
+  numberOfInstances: 1
+  users:
+    postgres:  # database owner
+    - superuser
+    - createdb
+    foo_user: []  # role for application foo
+  databases:
+    public: postgres  # dbname: owner
+  postgresql:
+    version: "15"
